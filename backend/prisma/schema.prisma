@@ -1,0 +1,322 @@
+// Prisma Schema for 1Fi LMS (Loan Management System)
+// This schema supports LAMF (Loan Against Mutual Funds) with shopping platform integration
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum UserRole {
+  BORROWER
+  ADMIN
+}
+
+enum PartnerStatus {
+  ACTIVE
+  BLOCKED
+}
+
+enum LoanProductStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum LoanApplicationStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  DISBURSED
+}
+
+enum ApplicationSource {
+  PLATFORM
+  PARTNER_API
+}
+
+enum LoanStatus {
+  ACTIVE
+  CLOSED
+  DEFAULTED
+}
+
+enum FundType {
+  EQUITY
+  DEBT
+  HYBRID
+}
+
+enum LienStatus {
+  PENDING
+  MARKED
+  RELEASE_REQUESTED
+  RELEASED
+}
+
+enum Registrar {
+  CAMS
+  KFINTECH
+  MFCENTRAL
+}
+
+enum ProductStatus {
+  ACTIVE
+  OUT_OF_STOCK
+  DISCONTINUED
+}
+
+enum DeliveryStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum TransactionType {
+  DISBURSEMENT
+  EMI_PAYMENT
+  PREPAYMENT
+  INTEREST_CHARGE
+  PENALTY
+}
+
+// ============================================
+// CORE ENTITIES
+// ============================================
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  phone        String?
+  pan          String?  @unique
+  passwordHash String   @map("password_hash")
+  role         UserRole @default(BORROWER)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  loanApplications LoanApplication[]
+  auditLogs        AuditLog[]
+
+  @@map("users")
+}
+
+model Partner {
+  id         String        @id @default(uuid())
+  name       String
+  email      String        @unique
+  apiKeyHash String        @map("api_key_hash")
+  webhookUrl String?       @map("webhook_url")
+  status     PartnerStatus @default(ACTIVE)
+  createdAt  DateTime      @default(now()) @map("created_at")
+  updatedAt  DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  loanApplications LoanApplication[]
+
+  @@map("partners")
+}
+
+// ============================================
+// LOAN CONFIGURATION
+// ============================================
+
+model LoanProduct {
+  id                   String            @id @default(uuid())
+  name                 String
+  description          String?
+  interestRate         Decimal           @map("interest_rate") @db.Decimal(5, 2)
+  processingFeePercent Decimal           @map("processing_fee_percent") @db.Decimal(5, 2)
+  minAmount            Int               @map("min_amount")
+  maxAmount            Int               @map("max_amount")
+  minTenureMonths      Int               @map("min_tenure_months")
+  maxTenureMonths      Int               @map("max_tenure_months")
+  equityLtv            Decimal           @map("equity_ltv") @db.Decimal(3, 2) // e.g., 0.50 = 50%
+  debtLtv              Decimal           @map("debt_ltv") @db.Decimal(3, 2)   // e.g., 0.80 = 80%
+  status               LoanProductStatus @default(ACTIVE)
+  createdAt            DateTime          @default(now()) @map("created_at")
+  updatedAt            DateTime          @updatedAt @map("updated_at")
+
+  // Relations
+  loanApplications LoanApplication[]
+
+  @@map("loan_products")
+}
+
+// ============================================
+// BUSINESS ENTITIES
+// ============================================
+
+model LoanApplication {
+  id                String                @id @default(uuid())
+  applicationNumber String                @unique @map("application_number")
+  userId            String                @map("user_id")
+  partnerId         String?               @map("partner_id")
+  loanProductId     String                @map("loan_product_id")
+  productId         String?               @map("product_id") // 1Fi specific - shopping product
+  requestedAmount   Int                   @map("requested_amount")
+  approvedAmount    Int?                  @map("approved_amount")
+  selectedTenure    Int                   @map("selected_tenure") // in months
+  status            LoanApplicationStatus @default(DRAFT)
+  rejectionReason   String?               @map("rejection_reason")
+  createdVia        ApplicationSource     @default(PLATFORM) @map("created_via")
+  createdAt         DateTime              @default(now()) @map("created_at")
+  updatedAt         DateTime              @updatedAt @map("updated_at")
+
+  // Relations
+  user        User         @relation(fields: [userId], references: [id])
+  partner     Partner?     @relation(fields: [partnerId], references: [id])
+  loanProduct LoanProduct  @relation(fields: [loanProductId], references: [id])
+  product     Product?     @relation(fields: [productId], references: [id])
+  collaterals Collateral[]
+  loan        Loan?
+
+  @@map("loan_applications")
+}
+
+model Loan {
+  id                   String     @id @default(uuid())
+  loanNumber           String     @unique @map("loan_number")
+  loanApplicationId    String     @unique @map("loan_application_id")
+  principal            Int
+  interestRate         Decimal    @map("interest_rate") @db.Decimal(5, 2)
+  tenureMonths         Int        @map("tenure_months")
+  emiAmount            Int        @map("emi_amount")
+  outstandingPrincipal Int        @map("outstanding_principal")
+  outstandingInterest  Int        @default(0) @map("outstanding_interest")
+  status               LoanStatus @default(ACTIVE)
+  disbursedAt          DateTime   @map("disbursed_at")
+  closedAt             DateTime?  @map("closed_at")
+  nextEmiDate          DateTime?  @map("next_emi_date")
+  createdAt            DateTime   @default(now()) @map("created_at")
+  updatedAt            DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  loanApplication  LoanApplication   @relation(fields: [loanApplicationId], references: [id])
+  collaterals      Collateral[]
+  transactions     LoanTransaction[]
+  order            Order?
+
+  @@map("loans")
+}
+
+model Collateral {
+  id                String     @id @default(uuid())
+  loanApplicationId String     @map("loan_application_id")
+  loanId            String?    @map("loan_id")
+  fundName          String     @map("fund_name")
+  fundType          FundType   @map("fund_type")
+  isin              String
+  folioNumber       String?    @map("folio_number")
+  units             Decimal    @db.Decimal(12, 4)
+  nav               Decimal    @db.Decimal(10, 4)
+  pledgedValue      Int        @map("pledged_value")  // Value at pledge time
+  currentValue      Int        @map("current_value")  // Current value (updated with NAV)
+  ltvApplied        Decimal    @map("ltv_applied") @db.Decimal(3, 2)
+  eligibleAmount    Int        @map("eligible_amount")
+  registrar         Registrar  @default(CAMS)
+  lienStatus        LienStatus @default(PENDING) @map("lien_status")
+  lienReference     String?    @map("lien_reference")
+  createdAt         DateTime   @default(now()) @map("created_at")
+  updatedAt         DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  loanApplication LoanApplication @relation(fields: [loanApplicationId], references: [id])
+  loan            Loan?           @relation(fields: [loanId], references: [id])
+
+  @@map("collaterals")
+}
+
+// ============================================
+// 1Fi SPECIFIC - SHOPPING PLATFORM
+// ============================================
+
+model Product {
+  id               String        @id @default(uuid())
+  name             String
+  description      String?
+  category         String
+  brand            String?
+  price            Int
+  imageUrl         String?       @map("image_url")
+  availableTenures Int[]         @map("available_tenures") // [3, 6, 12, 24]
+  stockQuantity    Int           @default(0) @map("stock_quantity")
+  status           ProductStatus @default(ACTIVE)
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  loanApplications LoanApplication[]
+  orders           Order[]
+
+  @@map("products")
+}
+
+model Order {
+  id                String         @id @default(uuid())
+  orderNumber       String         @unique @map("order_number")
+  loanId            String         @unique @map("loan_id")
+  productId         String         @map("product_id")
+  quantity          Int            @default(1)
+  shippingAddress   Json           @map("shipping_address")
+  deliveryStatus    DeliveryStatus @default(PENDING) @map("delivery_status")
+  trackingNumber    String?        @map("tracking_number")
+  estimatedDelivery DateTime?      @map("estimated_delivery")
+  deliveredAt       DateTime?      @map("delivered_at")
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
+
+  // Relations
+  loan    Loan    @relation(fields: [loanId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("orders")
+}
+
+// ============================================
+// TRANSACTION & AUDIT
+// ============================================
+
+model LoanTransaction {
+  id                 String          @id @default(uuid())
+  loanId             String          @map("loan_id")
+  type               TransactionType
+  amount             Int
+  principalComponent Int             @default(0) @map("principal_component")
+  interestComponent  Int             @default(0) @map("interest_component")
+  balanceAfter       Int             @map("balance_after")
+  reference          String?
+  createdAt          DateTime        @default(now()) @map("created_at")
+
+  // Relations
+  loan Loan @relation(fields: [loanId], references: [id])
+
+  @@map("loan_transactions")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  entityType  String   @map("entity_type")
+  entityId    String   @map("entity_id")
+  action      String
+  oldValue    Json?    @map("old_value")
+  newValue    Json?    @map("new_value")
+  performedBy String?  @map("performed_by")
+  ipAddress   String?  @map("ip_address")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user User? @relation(fields: [performedBy], references: [id])
+
+  @@map("audit_logs")
+}
