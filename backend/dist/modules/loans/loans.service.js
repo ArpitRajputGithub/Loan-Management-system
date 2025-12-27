@@ -1,0 +1,159 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.loanService = exports.LoanService = void 0;
+const database_1 = __importDefault(require("../../config/database"));
+const emi_calculator_1 = require("../../utils/emi.calculator");
+const ltv_calculator_1 = require("../../utils/ltv.calculator");
+/**
+ * Loans Service
+ * Manages active loans, EMI payments, and LTV monitoring.
+ */
+class LoanService {
+    async findAll(filters) {
+        const { status, page = 1, limit = 20 } = filters;
+        const where = {};
+        if (status)
+            where.status = status;
+        const [loans, total] = await Promise.all([
+            database_1.default.loan.findMany({
+                where,
+                include: {
+                    loanApplication: {
+                        include: {
+                            user: { select: { id: true, name: true, email: true } },
+                            product: { select: { id: true, name: true } },
+                        },
+                    },
+                    collaterals: true,
+                },
+                orderBy: { createdAt: 'desc' },
+                skip: (page - 1) * limit,
+                take: limit,
+            }),
+            database_1.default.loan.count({ where }),
+        ]);
+        // Add LTV status to each loan
+        const loansWithLtv = loans.map(loan => {
+            const totalCollateralValue = loan.collaterals.reduce((sum, c) => sum + c.currentValue, 0);
+            const ltvStatus = (0, ltv_calculator_1.calculateLtv)({
+                currentCollateralValue: totalCollateralValue,
+                outstandingAmount: loan.outstandingPrincipal + loan.outstandingInterest,
+            });
+            return {
+                ...loan,
+                totalCollateralValue,
+                ltvStatus,
+            };
+        });
+        return {
+            loans: loansWithLtv,
+            meta: { page, limit, total, totalPages: Math.ceil(total / limit) },
+        };
+    }
+    async findById(id) {
+        const loan = await database_1.default.loan.findUnique({
+            where: { id },
+            include: {
+                loanApplication: {
+                    include: {
+                        user: { select: { id: true, name: true, email: true, phone: true } },
+                        loanProduct: true,
+                        product: true,
+                    },
+                },
+                collaterals: true,
+                transactions: { orderBy: { createdAt: 'desc' } },
+                order: true,
+            },
+        });
+        if (!loan) {
+            throw new Error('Loan not found');
+        }
+        // Calculate EMI schedule
+        const emiSchedule = (0, emi_calculator_1.generateEmiSchedule)(loan.principal, Number(loan.interestRate), loan.tenureMonths, loan.disbursedAt);
+        // Calculate LTV
+        const totalCollateralValue = loan.collaterals.reduce((sum, c) => sum + c.currentValue, 0);
+        const ltvStatus = (0, ltv_calculator_1.calculateLtv)({
+            currentCollateralValue: totalCollateralValue,
+            outstandingAmount: loan.outstandingPrincipal + loan.outstandingInterest,
+        });
+        return {
+            ...loan,
+            emiSchedule,
+            totalCollateralValue,
+            ltvStatus,
+        };
+    }
+    async recordEmiPayment(id, amount) {
+        const loan = await database_1.default.loan.findUnique({ where: { id } });
+        if (!loan)
+            throw new Error('Loan not found');
+        if (loan.status !== 'ACTIVE')
+            throw new Error('Loan is not active');
+        // Split payment between interest and principal
+        const interestPortion = Math.min(amount, loan.outstandingInterest);
+        const principalPortion = amount - interestPortion;
+        const newOutstandingPrincipal = Math.max(0, loan.outstandingPrincipal - principalPortion);
+        const newOutstandingInterest = Math.max(0, loan.outstandingInterest - interestPortion);
+        // Update loan and create transaction
+        return database_1.default.$transaction(async (tx) => {
+            const updatedLoan = await tx.loan.update({
+                where: { id },
+                data: {
+                    outstandingPrincipal: newOutstandingPrincipal,
+                    outstandingInterest: newOutstandingInterest,
+                    nextEmiDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+                },
+            });
+            await tx.loanTransaction.create({
+                data: {
+                    loanId: id,
+                    type: 'EMI_PAYMENT',
+                    amount,
+                    principalComponent: principalPortion,
+                    interestComponent: interestPortion,
+                    balanceAfter: newOutstandingPrincipal + newOutstandingInterest,
+                },
+            });
+            return updatedLoan;
+        });
+    }
+    async closeLoan(id) {
+        const loan = await database_1.default.loan.findUnique({
+            where: { id },
+            include: { collaterals: true },
+        });
+        if (!loan)
+            throw new Error('Loan not found');
+        if (loan.status !== 'ACTIVE')
+            throw new Error('Loan is not active');
+        if (loan.outstandingPrincipal > 0 || loan.outstandingInterest > 0) {
+            throw new Error('Cannot close loan with outstanding balance');
+        }
+        return database_1.default.$transaction(async (tx) => {
+            // Update loan status
+            await tx.loan.update({
+                where: { id },
+                data: {
+                    status: 'CLOSED',
+                    closedAt: new Date(),
+                },
+            });
+            // Mark collaterals as release requested
+            await tx.collateral.updateMany({
+                where: { loanId: id },
+                data: { lienStatus: 'RELEASE_REQUESTED' },
+            });
+            return tx.loan.findUnique({
+                where: { id },
+                include: { collaterals: true },
+            });
+        });
+    }
+}
+exports.LoanService = LoanService;
+exports.loanService = new LoanService();
+//# sourceMappingURL=loans.service.js.map

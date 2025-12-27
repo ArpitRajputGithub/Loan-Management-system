@@ -278,6 +278,29 @@ class ApiClient {
         const params = entityType ? `?entityType=${entityType}` : '';
         return this.request<any[]>(`/audit-logs${params}`);
     }
+
+    // Generic methods for new endpoints
+    async get(endpoint: string) {
+        const response = await fetch(`${API_BASE}${endpoint}`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.getToken()}`,
+            },
+        });
+        return response.json();
+    }
+
+    async post(endpoint: string, data: Record<string, any>) {
+        const response = await fetch(`${API_BASE}${endpoint}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.getToken()}`,
+            },
+            body: JSON.stringify(data),
+        });
+        return response.json();
+    }
 }
 
 export const api = new ApiClient();

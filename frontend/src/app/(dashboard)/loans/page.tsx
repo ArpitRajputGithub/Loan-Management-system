@@ -70,11 +70,11 @@ export default function LoansPage() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 sm:space-y-6 animate-fade-in">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white">Active Loans</h1>
-        <p className="text-[var(--foreground-muted)] mt-1">Monitor ongoing loans and their LTV status</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-[var(--foreground)]">Active Loans</h1>
+        <p className="text-[var(--foreground-muted)] mt-1 text-sm sm:text-base">Monitor ongoing loans and their LTV status</p>
       </div>
 
       {/* LTV Alert Banner */}
@@ -113,7 +113,7 @@ export default function LoansPage() {
       )}
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         <div className="stat-card">
           <p className="text-sm text-[var(--foreground-muted)]">Total Loans</p>
           <p className="text-2xl font-bold text-white">{loans.length}</p>
@@ -139,7 +139,7 @@ export default function LoansPage() {
       </div>
 
       {/* Loans Table */}
-      <div className="card p-6">
+      <div className="card p-4 sm:p-6">
         {loading ? (
           <div className="flex justify-center py-12">
             <div className="spinner" />
@@ -155,7 +155,8 @@ export default function LoansPage() {
             <p className="text-[var(--foreground-muted)]">Disbursed loans will appear here</p>
           </div>
         ) : (
-          <table className="data-table">
+          <div className="table-wrapper">
+            <table className="data-table">
             <thead>
               <tr>
                 <th>Loan ID</th>
@@ -200,7 +201,8 @@ export default function LoansPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </div>
         )}
       </div>
     </div>

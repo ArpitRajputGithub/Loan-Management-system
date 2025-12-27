@@ -29,20 +29,20 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className={`space-y-8 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`}>
+    <div className={`space-y-6 sm:space-y-8 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`}>
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-          <p className="text-[var(--foreground-muted)] mt-1">Welcome back! Here&apos;s your loan management overview.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[var(--foreground)]">Dashboard</h1>
+          <p className="text-[var(--foreground-muted)] mt-1 text-sm sm:text-base">Welcome back! Here&apos;s your loan management overview.</p>
         </div>
-        <Link href="/eligibility" className="btn-primary">
+        <Link href="/eligibility" className="btn-primary w-full sm:w-auto text-center">
           + New Application
         </Link>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         {/* Total AUM */}
         <div className="stat-card">
           <div className="flex items-center justify-between mb-4">
@@ -144,15 +144,16 @@ export default function DashboardPage() {
       </div>
 
       {/* Recent Applications */}
-      <div className="card p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold text-white">Recent Applications</h2>
+      <div className="card p-4 sm:p-6">
+        <div className="flex justify-between items-center mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-[var(--foreground)]">Recent Applications</h2>
           <Link href="/applications" className="text-[var(--primary)] hover:underline text-sm">
             View All →
           </Link>
         </div>
         
-        <table className="data-table">
+        <div className="table-wrapper">
+          <table className="data-table">
           <thead>
             <tr>
               <th>Application ID</th>
@@ -166,11 +167,11 @@ export default function DashboardPage() {
           <tbody>
             <tr>
               <td className="font-mono text-sm">LA-2024-00001</td>
-              <td>Rahul Sharma</td>
-              <td>₹2,00,000</td>
+              <td>Arpit Rajput</td>
+              <td>₹5,00,000</td>
               <td>LAMF Standard</td>
-              <td><span className="badge badge-warning">Draft</span></td>
-              <td className="text-[var(--foreground-muted)]">Dec 25, 2024</td>
+              <td><span className="badge badge-success">Disbursed</span></td>
+              <td className="text-[var(--foreground-muted)]">Dec 27, 2024</td>
             </tr>
             <tr>
               <td className="font-mono text-sm">LA-2024-00002</td>
@@ -178,10 +179,19 @@ export default function DashboardPage() {
               <td>₹1,59,900</td>
               <td>No-Cost EMI</td>
               <td><span className="badge badge-success">Disbursed</span></td>
-              <td className="text-[var(--foreground-muted)]">Dec 24, 2024</td>
+              <td className="text-[var(--foreground-muted)]">Dec 26, 2024</td>
+            </tr>
+            <tr>
+              <td className="font-mono text-sm">LA-2024-00003</td>
+              <td>Amit Kumar</td>
+              <td>₹9,00,000</td>
+              <td>LAMF Premium</td>
+              <td><span className="badge badge-info">Approved</span></td>
+              <td className="text-[var(--foreground-muted)]">Dec 25, 2024</td>
             </tr>
           </tbody>
-        </table>
+          </table>
+        </div>
       </div>
     </div>
   );

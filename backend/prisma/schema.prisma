@@ -89,6 +89,28 @@ enum TransactionType {
   PENALTY
 }
 
+enum KycStatus {
+  PENDING
+  IN_PROGRESS
+  VERIFIED
+  REJECTED
+}
+
+enum EmiStatus {
+  PENDING
+  PAID
+  OVERDUE
+  PARTIALLY_PAID
+}
+
+enum MarginCallStatus {
+  PENDING
+  NOTIFIED
+  TOPPED_UP
+  RESOLVED
+  LIQUIDATED
+}
+
 // ============================================
 // CORE ENTITIES
 // ============================================
@@ -206,6 +228,8 @@ model Loan {
   collaterals      Collateral[]
   transactions     LoanTransaction[]
   order            Order?
+  emiSchedules     EMISchedule[]
+  marginCalls      MarginCall[]
 
   @@map("loans")
 }
@@ -320,3 +344,105 @@ model AuditLog {
 
   @@map("audit_logs")
 }
+
+// ============================================
+// CUSTOMER MANAGEMENT (KYC)
+// ============================================
+
+model Customer {
+  id              String    @id @default(uuid())
+  firstName       String    @map("first_name")
+  lastName        String    @map("last_name")
+  email           String    @unique
+  phone           String
+  dateOfBirth     DateTime? @map("date_of_birth")
+  
+  // KYC - Aadhaar
+  aadhaarNumber   String?   @unique @map("aadhaar_number")
+  aadhaarVerified Boolean   @default(false) @map("aadhaar_verified")
+  aadhaarVerifiedAt DateTime? @map("aadhaar_verified_at")
+  
+  // KYC - PAN
+  panNumber       String?   @unique @map("pan_number")
+  panVerified     Boolean   @default(false) @map("pan_verified")
+  panVerifiedAt   DateTime? @map("pan_verified_at")
+  
+  // KYC Status
+  kycStatus       KycStatus @default(PENDING) @map("kyc_status")
+  kycRejectionReason String? @map("kyc_rejection_reason")
+  
+  // Address
+  addressLine1    String?   @map("address_line_1")
+  addressLine2    String?   @map("address_line_2")
+  city            String?
+  state           String?
+  pincode         String?
+  
+  // Employment
+  employmentType  String?   @map("employment_type") // SALARIED, SELF_EMPLOYED, BUSINESS
+  monthlyIncome   Int?      @map("monthly_income")
+  companyName     String?   @map("company_name")
+  
+  // Bank Details
+  bankAccountNumber String? @map("bank_account_number")
+  bankIfscCode    String?   @map("bank_ifsc_code")
+  bankName        String?   @map("bank_name")
+  
+  // Risk
+  creditScore     Int?      @map("credit_score")
+  
+  // Timestamps
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@map("customers")
+}
+
+// ============================================
+// EMI SCHEDULE
+// ============================================
+
+model EMISchedule {
+  id              String    @id @default(uuid())
+  loanId          String    @map("loan_id")
+  installmentNo   Int       @map("installment_no")
+  dueDate         DateTime  @map("due_date")
+  emiAmount       Int       @map("emi_amount")
+  principalAmount Int       @map("principal_amount")
+  interestAmount  Int       @map("interest_amount")
+  status          EmiStatus @default(PENDING)
+  paidAmount      Int       @default(0) @map("paid_amount")
+  paidAt          DateTime? @map("paid_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  loan            Loan      @relation(fields: [loanId], references: [id])
+
+  @@unique([loanId, installmentNo])
+  @@map("emi_schedules")
+}
+
+// ============================================
+// MARGIN CALLS (LTV MONITORING)
+// ============================================
+
+model MarginCall {
+  id              String           @id @default(uuid())
+  callNumber      String           @unique @map("call_number")
+  loanId          String           @map("loan_id")
+  triggerLtv      Decimal          @map("trigger_ltv") @db.Decimal(5, 2)
+  currentLtv      Decimal          @map("current_ltv") @db.Decimal(5, 2)
+  shortfallAmount Int              @map("shortfall_amount")
+  status          MarginCallStatus @default(PENDING)
+  dueDate         DateTime         @map("due_date")
+  topUpAmount     Int?             @map("top_up_amount")
+  resolvedAt      DateTime?        @map("resolved_at")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
+  // Relations
+  loan            Loan             @relation(fields: [loanId], references: [id])
+
+  @@map("margin_calls")
+}
+

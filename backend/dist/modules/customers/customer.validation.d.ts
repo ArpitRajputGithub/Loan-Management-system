@@ -1,0 +1,81 @@
+import { z } from 'zod';
+export declare const createCustomerSchema: z.ZodObject<{
+    firstName: z.ZodString;
+    lastName: z.ZodString;
+    email: z.ZodString;
+    phone: z.ZodString;
+    dateOfBirth: z.ZodOptional<z.ZodString>;
+    aadhaarNumber: z.ZodOptional<z.ZodString>;
+    panNumber: z.ZodOptional<z.ZodString>;
+    addressLine1: z.ZodOptional<z.ZodString>;
+    addressLine2: z.ZodOptional<z.ZodString>;
+    city: z.ZodOptional<z.ZodString>;
+    state: z.ZodOptional<z.ZodString>;
+    pincode: z.ZodOptional<z.ZodString>;
+    employmentType: z.ZodOptional<z.ZodEnum<["SALARIED", "SELF_EMPLOYED", "BUSINESS"]>>;
+    monthlyIncome: z.ZodOptional<z.ZodNumber>;
+    companyName: z.ZodOptional<z.ZodString>;
+    bankAccountNumber: z.ZodOptional<z.ZodString>;
+    bankIfscCode: z.ZodOptional<z.ZodString>;
+    bankName: z.ZodOptional<z.ZodString>;
+    creditScore: z.ZodOptional<z.ZodNumber>;
+}, "strip", z.ZodTypeAny, {
+    email: string;
+    phone: string;
+    firstName: string;
+    lastName: string;
+    dateOfBirth?: string | undefined;
+    aadhaarNumber?: string | undefined;
+    panNumber?: string | undefined;
+    addressLine1?: string | undefined;
+    addressLine2?: string | undefined;
+    city?: string | undefined;
+    state?: string | undefined;
+    pincode?: string | undefined;
+    employmentType?: "SALARIED" | "SELF_EMPLOYED" | "BUSINESS" | undefined;
+    monthlyIncome?: number | undefined;
+    companyName?: string | undefined;
+    bankAccountNumber?: string | undefined;
+    bankIfscCode?: string | undefined;
+    bankName?: string | undefined;
+    creditScore?: number | undefined;
+}, {
+    email: string;
+    phone: string;
+    firstName: string;
+    lastName: string;
+    dateOfBirth?: string | undefined;
+    aadhaarNumber?: string | undefined;
+    panNumber?: string | undefined;
+    addressLine1?: string | undefined;
+    addressLine2?: string | undefined;
+    city?: string | undefined;
+    state?: string | undefined;
+    pincode?: string | undefined;
+    employmentType?: "SALARIED" | "SELF_EMPLOYED" | "BUSINESS" | undefined;
+    monthlyIncome?: number | undefined;
+    companyName?: string | undefined;
+    bankAccountNumber?: string | undefined;
+    bankIfscCode?: string | undefined;
+    bankName?: string | undefined;
+    creditScore?: number | undefined;
+}>;
+export declare const updateKycSchema: z.ZodObject<{
+    kycStatus: z.ZodEnum<["PENDING", "IN_PROGRESS", "VERIFIED", "REJECTED"]>;
+    aadhaarVerified: z.ZodOptional<z.ZodBoolean>;
+    panVerified: z.ZodOptional<z.ZodBoolean>;
+    kycRejectionReason: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    kycStatus: "REJECTED" | "PENDING" | "IN_PROGRESS" | "VERIFIED";
+    aadhaarVerified?: boolean | undefined;
+    panVerified?: boolean | undefined;
+    kycRejectionReason?: string | undefined;
+}, {
+    kycStatus: "REJECTED" | "PENDING" | "IN_PROGRESS" | "VERIFIED";
+    aadhaarVerified?: boolean | undefined;
+    panVerified?: boolean | undefined;
+    kycRejectionReason?: string | undefined;
+}>;
+export type CreateCustomerInput = z.infer<typeof createCustomerSchema>;
+export type UpdateKycInput = z.infer<typeof updateKycSchema>;
+//# sourceMappingURL=customer.validation.d.ts.map

@@ -104,7 +104,6 @@ export default function LoginPage() {
                 onClick={() => {
                   setEmail('admin@1fi.in');
                   setPassword('admin123');
-                  navigator.clipboard.writeText('admin@1fi.in / admin123');
                 }}
                 className="w-full text-left p-2 rounded-lg bg-[var(--background-card)] hover:bg-[var(--primary)]/10 transition-all group"
               >
@@ -116,14 +115,13 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => {
-                  setEmail('rahul@example.com');
+                  setEmail('arpit@example.com');
                   setPassword('user123');
-                  navigator.clipboard.writeText('rahul@example.com / user123');
                 }}
                 className="w-full text-left p-2 rounded-lg bg-[var(--background-card)] hover:bg-[var(--primary)]/10 transition-all group"
               >
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-mono text-white">rahul@example.com / user123</span>
+                  <span className="text-sm font-mono text-white">arpit@example.com / user123</span>
                   <span className="text-xs text-[var(--primary)] opacity-0 group-hover:opacity-100">User →</span>
                 </div>
               </button>

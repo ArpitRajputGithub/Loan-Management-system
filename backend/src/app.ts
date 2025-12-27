@@ -14,6 +14,9 @@ import eligibilityRoutes from './modules/eligibility/eligibility.routes';
 import dashboardRoutes from './modules/dashboard/dashboard.routes';
 import partnerRoutes from './modules/partners/partners.routes';
 import auditLogRoutes from './modules/auditLogs/auditLogs.routes';
+import customerRoutes from './modules/customers/customer.routes';
+import emiRoutes from './modules/emi/emi.routes';
+import marginCallRoutes from './modules/marginCalls/marginCall.routes';
 
 const app: Application = express();
 
@@ -57,6 +60,9 @@ app.use('/api/v1/products', productRoutes);
 app.use('/api/v1/eligibility', eligibilityRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/audit-logs', auditLogRoutes);
+app.use('/api/v1/customers', customerRoutes);
+app.use('/api/v1/emi', emiRoutes);
+app.use('/api/v1/margin-calls', marginCallRoutes);
 
 // Partner API (separate namespace with API key auth)
 app.use('/api/v1/partner', partnerRoutes);

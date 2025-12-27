@@ -61,25 +61,25 @@ export default function ApplicationsPage() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 sm:space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white">Loan Applications</h1>
-          <p className="text-[var(--foreground-muted)] mt-1">Manage all loan applications</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[var(--foreground)]">Loan Applications</h1>
+          <p className="text-[var(--foreground-muted)] mt-1 text-sm sm:text-base">Manage all loan applications</p>
         </div>
-        <Link href="/applications/new" className="btn-primary">
+        <Link href="/applications/new" className="btn-primary w-full sm:w-auto text-center">
           + New Application
         </Link>
       </div>
 
       {/* Filters */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
         {['', 'DRAFT', 'SUBMITTED', 'UNDER_REVIEW', 'APPROVED', 'DISBURSED', 'REJECTED'].map((status) => (
           <button
             key={status}
             onClick={() => setFilter(status)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
               filter === status
                 ? 'bg-[var(--primary)] text-white'
                 : 'bg-[var(--background-card)] text-[var(--foreground-muted)] hover:text-white'
@@ -110,7 +110,8 @@ export default function ApplicationsPage() {
             </Link>
           </div>
         ) : (
-          <table className="data-table">
+          <div className="table-wrapper">
+            <table className="data-table">
             <thead>
               <tr>
                 <th>Application ID</th>
@@ -145,7 +146,8 @@ export default function ApplicationsPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </div>
         )}
       </div>
     </div>

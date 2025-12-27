@@ -16,6 +16,8 @@ async function main() {
 
     // Clean existing data
     console.log('🧹 Cleaning existing data...');
+    await prisma.marginCall.deleteMany();
+    await prisma.eMISchedule.deleteMany();
     await prisma.auditLog.deleteMany();
     await prisma.loanTransaction.deleteMany();
     await prisma.order.deleteMany();
@@ -26,6 +28,7 @@ async function main() {
     await prisma.loanProduct.deleteMany();
     await prisma.partner.deleteMany();
     await prisma.user.deleteMany();
+    await prisma.customer.deleteMany();
 
     // ==========================================
     // 1. USERS
@@ -46,10 +49,10 @@ async function main() {
         },
     });
 
-    const rahul = await prisma.user.create({
+    const arpit = await prisma.user.create({
         data: {
-            name: 'Rahul Sharma',
-            email: 'rahul@example.com',
+            name: 'Arpit Rajput',
+            email: 'arpit@example.com',
             phone: '9876543211',
             pan: 'ABCDE1234F',
             passwordHash: userPassword,
@@ -91,6 +94,126 @@ async function main() {
     });
 
     console.log('   ✅ Created 5 users');
+
+    // ==========================================
+    // 1.5 CUSTOMERS (KYC Data)
+    // ==========================================
+    console.log('\n👤 Creating customers with KYC data...');
+
+    await prisma.customer.create({
+        data: {
+            firstName: 'Arpit',
+            lastName: 'Rajput',
+            email: 'arpit@example.com',
+            phone: '9876543211',
+            dateOfBirth: new Date('1990-05-15'),
+            aadhaarNumber: '123456789012',
+            aadhaarVerified: true,
+            aadhaarVerifiedAt: new Date(),
+            panNumber: 'ABCDE1234F',
+            panVerified: true,
+            panVerifiedAt: new Date(),
+            kycStatus: 'VERIFIED',
+            addressLine1: '123 MG Road',
+            city: 'Bangalore',
+            state: 'Karnataka',
+            pincode: '560001',
+            employmentType: 'SALARIED',
+            monthlyIncome: 150000,
+            companyName: 'TCS',
+            creditScore: 780,
+        },
+    });
+
+    await prisma.customer.create({
+        data: {
+            firstName: 'Priya',
+            lastName: 'Patel',
+            email: 'priya.patel@example.com',
+            phone: '9876543212',
+            dateOfBirth: new Date('1992-08-22'),
+            aadhaarNumber: '234567890123',
+            aadhaarVerified: true,
+            aadhaarVerifiedAt: new Date(),
+            panNumber: 'FGHIJ5678K',
+            panVerified: true,
+            panVerifiedAt: new Date(),
+            kycStatus: 'VERIFIED',
+            addressLine1: '45 Jubilee Hills',
+            city: 'Hyderabad',
+            state: 'Telangana',
+            pincode: '500033',
+            employmentType: 'SELF_EMPLOYED',
+            monthlyIncome: 200000,
+            creditScore: 720,
+        },
+    });
+
+    await prisma.customer.create({
+        data: {
+            firstName: 'Amit',
+            lastName: 'Kumar',
+            email: 'amit.kumar@example.com',
+            phone: '9876543213',
+            dateOfBirth: new Date('1988-12-10'),
+            aadhaarNumber: '345678901234',
+            aadhaarVerified: false,
+            panNumber: 'LMNOP9012Q',
+            panVerified: true,
+            panVerifiedAt: new Date(),
+            kycStatus: 'IN_PROGRESS',
+            addressLine1: '78 Connaught Place',
+            city: 'Delhi',
+            state: 'Delhi',
+            pincode: '110001',
+            employmentType: 'BUSINESS',
+            monthlyIncome: 500000,
+            companyName: 'Kumar Enterprises',
+            creditScore: 690,
+        },
+    });
+
+    await prisma.customer.create({
+        data: {
+            firstName: 'Neha',
+            lastName: 'Gupta',
+            email: 'neha.gupta@example.com',
+            phone: '9876543214',
+            dateOfBirth: new Date('1995-03-08'),
+            kycStatus: 'PENDING',
+            addressLine1: '12 Marine Drive',
+            city: 'Mumbai',
+            state: 'Maharashtra',
+            pincode: '400001',
+            employmentType: 'SALARIED',
+            monthlyIncome: 80000,
+            companyName: 'Wipro',
+        },
+    });
+
+    await prisma.customer.create({
+        data: {
+            firstName: 'Vikram',
+            lastName: 'Singh',
+            email: 'vikram.singh@example.com',
+            phone: '9876543215',
+            dateOfBirth: new Date('1985-07-25'),
+            aadhaarNumber: '456789012345',
+            aadhaarVerified: false,
+            panNumber: 'VIKRS1234V',
+            panVerified: false,
+            kycStatus: 'REJECTED',
+            kycRejectionReason: 'Document verification failed - blurry Aadhaar copy',
+            addressLine1: '56 Park Street',
+            city: 'Kolkata',
+            state: 'West Bengal',
+            pincode: '700016',
+            employmentType: 'SALARIED',
+            monthlyIncome: 120000,
+        },
+    });
+
+    console.log('   ✅ Created 5 customers with KYC data');
 
     // ==========================================
     // 2. PARTNERS (Fintech)
@@ -255,11 +378,11 @@ async function main() {
     // ==========================================
     console.log('\n📝 Creating loan applications...');
 
-    // Application 1: DISBURSED (Rahul - Standard LAMF)
+    // Application 1: DISBURSED (Arpit - Standard LAMF)
     const app1 = await prisma.loanApplication.create({
         data: {
             applicationNumber: 'LA-2024-00001',
-            userId: rahul.id,
+            userId: arpit.id,
             loanProductId: lamfStandard.id,
             requestedAmount: 500000,
             approvedAmount: 500000,
@@ -315,7 +438,7 @@ async function main() {
     await prisma.loanApplication.create({
         data: {
             applicationNumber: 'LA-2024-00005',
-            userId: rahul.id,
+            userId: arpit.id,
             partnerId: partner1.id,
             loanProductId: lamfStandard.id,
             requestedAmount: 200000,
@@ -359,7 +482,7 @@ async function main() {
     // ==========================================
     console.log('\n🔒 Creating collaterals...');
 
-    // Collateral for Rahul's loan (App 1)
+    // Collateral for Arpit's loan (App 1)
     const col1 = await prisma.collateral.create({
         data: {
             loanApplicationId: app1.id,
@@ -575,6 +698,7 @@ async function main() {
     console.log('='.repeat(50));
     console.log('\n📋 Summary:');
     console.log('   • 5 Users (1 admin, 4 borrowers)');
+    console.log('   • 5 Customers with KYC data');
     console.log('   • 2 Partners (Groww, Zerodha)');
     console.log('   • 3 Loan Products');
     console.log('   • 5 Shopping Products');
@@ -586,7 +710,7 @@ async function main() {
 
     console.log('\n🔑 Login Credentials:');
     console.log('   Admin:  admin@1fi.in / admin123');
-    console.log('   User:   rahul@example.com / user123');
+    console.log('   User:   arpit@example.com / user123');
     console.log('   User:   priya@example.com / user123');
 
     console.log('\n🔐 Partner API Keys:');

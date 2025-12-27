@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
-/* 1Fi LMS - Black Theme with Green & Cream Accents */
-/* Color Palette: #000000 (BG) + #628141 #8BAE66 #EBD5AB (Accents) */
+/* 1Fi LMS - Dual Theme with Green & Cream Accents */
+/* Color Palette: #628141 #8BAE66 #EBD5AB (Accents) */
 
 /* Chillax Font */
 @font-face {
@@ -13,31 +13,53 @@
   font-style: normal;
 }
 
+/* Light theme (default) */
 :root {
-  /* Primary colors - Nature green accents */
+  --primary: #628141;
+  --primary-dark: #4a6331;
+  --primary-light: #8BAE66;
+  
+  --accent-green: #628141;
+  --accent-cream: #8B7355;
+  --accent-red: #dc3545;
+  --accent-yellow: #D4A574;
+  --accent-blue: #4a6331;
+  
+  --background: #ffffff;
+  --background-secondary: #f8f9fa;
+  --background-card: #ffffff;
+  --foreground: #1a1a1a;
+  --foreground-muted: #6b7280;
+  
+  --border: rgba(98, 129, 65, 0.15);
+  --border-hover: rgba(98, 129, 65, 0.35);
+  
+  --gradient-primary: linear-gradient(135deg, #628141 0%, #8BAE66 100%);
+  --gradient-card: linear-gradient(145deg, rgba(255, 255, 255, 1), rgba(248, 249, 250, 0.9));
+  --gradient-glass: linear-gradient(135deg, rgba(98, 129, 65, 0.05) 0%, rgba(98, 129, 65, 0.01) 100%);
+}
+
+/* Dark theme */
+.dark {
   --primary: #8BAE66;
   --primary-dark: #628141;
   --primary-light: #a4c77a;
   
-  /* Accent colors */
   --accent-green: #8BAE66;
   --accent-cream: #EBD5AB;
   --accent-red: #e55c5c;
   --accent-yellow: #EBD5AB;
   --accent-blue: #628141;
   
-  /* Pure black theme */
   --background: #000000;
   --background-secondary: #0a0a0a;
   --background-card: #111111;
   --foreground: #ffffff;
   --foreground-muted: #888888;
   
-  /* Borders with subtle green tint */
   --border: rgba(139, 174, 102, 0.2);
   --border-hover: rgba(139, 174, 102, 0.4);
   
-  /* Gradients */
   --gradient-primary: linear-gradient(135deg, #628141 0%, #8BAE66 100%);
   --gradient-card: linear-gradient(145deg, rgba(17, 17, 17, 1), rgba(8, 8, 8, 0.9));
   --gradient-glass: linear-gradient(135deg, rgba(139, 174, 102, 0.08) 0%, rgba(139, 174, 102, 0.02) 100%);
@@ -233,6 +255,19 @@ h1, h2, h3, h4, h5, h6 {
   border-color: var(--border-hover);
 }
 
+/* Responsive stat card */
+@media (max-width: 640px) {
+  .stat-card {
+    padding: 16px;
+  }
+}
+
+/* Scrollable table wrapper */
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 /* Table styles */
 .data-table {
   width: 100%;
@@ -324,4 +359,179 @@ h1, h2, h3, h4, h5, h6 {
 /* Green accent text */  
 .text-green {
   color: #8BAE66;
+}
+
+/* ============================================
+   RESPONSIVE STYLES
+   ============================================ */
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Prevent horizontal overflow */
+body {
+  overflow-x: hidden;
+}
+
+/* Tablet and below (768px) */
+@media (max-width: 768px) {
+  /* Typography scaling */
+  h1 {
+    font-size: clamp(1.75rem, 6vw, 2.5rem);
+  }
+  
+  h2 {
+    font-size: clamp(1.5rem, 5vw, 2rem);
+  }
+  
+  h3 {
+    font-size: 1.125rem;
+  }
+
+  /* Button touch targets */
+  .btn-primary,
+  .btn-secondary {
+    min-height: 44px;
+    padding: 0.75rem 1.25rem;
+  }
+
+  /* Card improvements */
+  .card {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+
+  /* Stat card mobile */
+  .stat-card {
+    padding: 1rem;
+  }
+
+  /* Badge adjustments */
+  .badge {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+
+  /* Navigation item spacing */
+  .nav-item {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+  }
+
+  /* Table cell padding */
+  .data-table th,
+  .data-table td {
+    padding: 12px 8px;
+    font-size: 0.8125rem;
+  }
+
+  /* Input fields */
+  .input-field {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+  }
+}
+
+/* Mobile (480px and below) */
+@media (max-width: 480px) {
+  /* Even smaller typography */
+  h1 {
+    font-size: clamp(1.5rem, 7vw, 2rem);
+  }
+
+  h2 {
+    font-size: clamp(1.25rem, 5vw, 1.75rem);
+  }
+
+  h3 {
+    font-size: 1rem;
+  }
+
+  p {
+    font-size: 0.9375rem;
+  }
+
+  /* Full-width buttons for better touch */
+  .btn-primary,
+  .btn-secondary {
+    min-height: 48px;
+    padding: 0.875rem 1.5rem;
+    font-size: 0.9375rem;
+  }
+
+  /* Card styling */
+  .card {
+    padding: 0.875rem;
+    border-radius: 10px;
+  }
+
+  .card:hover {
+    transform: none; /* Disable hover lift on mobile */
+  }
+
+  /* Stat card */
+  .stat-card {
+    padding: 0.875rem;
+  }
+
+  .stat-card:hover {
+    transform: none;
+  }
+
+  /* Table styling */
+  .data-table th,
+  .data-table td {
+    padding: 10px 6px;
+    font-size: 0.75rem;
+  }
+
+  .data-table th {
+    font-size: 0.6875rem;
+  }
+
+  /* Badge on mobile */
+  .badge {
+    font-size: 9px;
+    padding: 2px 6px;
+  }
+
+  /* Input fields - larger touch target */
+  .input-field {
+    min-height: 48px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  /* Navigation items */
+  .nav-item {
+    padding: 0.75rem 1rem;
+  }
+
+  /* Spinner size */
+  .spinner {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Remove hover effects on touch devices */
+  .card:hover,
+  .stat-card:hover,
+  .glass-card:hover {
+    transform: none;
+  }
+
+  /* Better tap feedback */
+  .btn-primary:active,
+  .btn-secondary:active {
+    transform: scale(0.98);
+  }
+
+  .nav-item:active {
+    background: var(--primary);
+    color: white;
+  }
 }

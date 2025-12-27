@@ -273,6 +273,100 @@ npm run dev
 
 ---
 
+### Customer Management (KYC)
+
+#### GET `/api/v1/customers`
+```json
+// Response
+{
+  "customers": [
+    {
+      "id": "uuid",
+      "firstName": "Rahul",
+      "lastName": "Sharma",
+      "email": "rahul@example.com",
+      "phone": "9876543210",
+      "kycStatus": "VERIFIED",
+      "aadhaarVerified": true,
+      "panVerified": true,
+      "creditScore": 750
+    }
+  ],
+  "pagination": { "page": 1, "total": 50, "totalPages": 3 }
+}
+```
+
+#### GET `/api/v1/customers/kyc-stats`
+```json
+// Response
+{
+  "pending": 12,
+  "inProgress": 5,
+  "verified": 45,
+  "rejected": 3,
+  "total": 65
+}
+```
+
+### EMI Schedule
+
+#### GET `/api/v1/emi/calculate?principal=100000&rate=12&tenure=12`
+```json
+// Response
+{
+  "emiAmount": 8885,
+  "totalPayment": 106620,
+  "totalInterest": 6620,
+  "schedule": [
+    {
+      "installmentNo": 1,
+      "emiAmount": 8885,
+      "principalAmount": 7885,
+      "interestAmount": 1000,
+      "openingBalance": 100000,
+      "closingBalance": 92115
+    }
+  ]
+}
+```
+
+#### GET `/api/v1/emi/loan/:loanId`
+```json
+// Response
+{
+  "paid": 3,
+  "pending": 9,
+  "overdue": 0,
+  "totalPaid": 26655,
+  "totalDue": 106620,
+  "schedule": [...]
+}
+```
+
+### Margin Calls (LTV Monitoring)
+
+#### GET `/api/v1/margin-calls/ltv/:loanId`
+```json
+// Response
+{
+  "ltv": 68.5,
+  "collateralValue": 200000,
+  "outstandingAmount": 137000,
+  "status": "WARNING",
+  "thresholds": {
+    "SAFE": 60,
+    "WARNING": 70,
+    "MARGIN_CALL": 75,
+    "LIQUIDATION": 85
+  }
+}
+```
+
+#### POST `/api/v1/margin-calls/check`
+Checks all active loans and creates margin calls if LTV exceeds threshold.
+
+---
+
 ## Database Schema
 
 ### Entity Relationship Diagram
