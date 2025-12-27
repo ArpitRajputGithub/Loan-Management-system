@@ -206,9 +206,9 @@ export default function EligibilityPage() {
 
               {/* CTA */}
               <div className="text-center">
-                <button className="btn-primary text-lg px-8 py-4">
+                <a href="/applications/new" className="btn-primary text-lg px-8 py-4 inline-block">
                   Apply for Loan →
-                </button>
+                </a>
               </div>
             </>
           )}
