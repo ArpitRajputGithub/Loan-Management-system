@@ -18,6 +18,10 @@ import customerRoutes from './modules/customers/customer.routes';
 import emiRoutes from './modules/emi/emi.routes';
 import marginCallRoutes from './modules/marginCalls/marginCall.routes';
 
+// Credit Line System routes
+import creditLineRoutes from './modules/creditLines/creditLines.routes';
+import trancheRoutes, { creditLineTranchesRouter } from './modules/tranches/tranches.routes';
+
 const app: Application = express();
 
 // ============================================
@@ -63,6 +67,11 @@ app.use('/api/v1/audit-logs', auditLogRoutes);
 app.use('/api/v1/customers', customerRoutes);
 app.use('/api/v1/emi', emiRoutes);
 app.use('/api/v1/margin-calls', marginCallRoutes);
+
+// Credit Line System routes
+app.use('/api/v1/credit-lines', creditLineRoutes);
+app.use('/api/v1/credit-lines/:creditLineId/tranches', creditLineTranchesRouter);
+app.use('/api/v1/tranches', trancheRoutes);
 
 // Partner API (separate namespace with API key auth)
 app.use('/api/v1/partner', partnerRoutes);

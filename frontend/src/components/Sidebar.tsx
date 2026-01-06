@@ -56,6 +56,12 @@ const LockIcon = () => (
   </svg>
 );
 
+const WalletIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" />
+  </svg>
+);
+
 const BookIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -89,10 +95,12 @@ const CloseIcon = () => (
 const navItems = [
   { href: '/', label: 'Dashboard', icon: HomeIcon },
   { href: '/eligibility', label: 'Check Eligibility', icon: CheckIcon },
+  { href: '/credit-line', label: 'Credit Line', icon: WalletIcon },
   { href: '/applications', label: 'Applications', icon: FileIcon },
   { href: '/loans', label: 'Active Loans', icon: CreditCardIcon },
   { href: '/collaterals', label: 'Collaterals', icon: LockIcon },
   { href: '/customers', label: 'Customers', icon: UsersIcon, adminOnly: true },
+  { href: '/admin/credit-lines', label: 'Credit Lines Mgmt', icon: WalletIcon, adminOnly: true },
   { href: '/margin-calls', label: 'Margin Calls', icon: AlertIcon, adminOnly: true },
   { href: '/products', label: 'Shop', icon: ShoppingIcon },
   { href: '/loan-products', label: 'Loan Products', icon: SettingsIcon },
@@ -136,11 +144,17 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   };
 
   const filteredNavItems = navItems.filter(item => {
+    // Admin only items
     if ('adminOnly' in item && item.adminOnly) {
       return isAdmin;
     }
+    // Specific pages restricted to Admin
     if (item.href === '/loan-products' || item.href === '/api-docs' || item.href === '/activity') {
       return isAdmin;
+    }
+    // Borrower specific pages that Admin doesn't need
+    if (isAdmin && (item.href === '/credit-line' || item.href === '/eligibility')) {
+      return false;
     }
     return true;
   });

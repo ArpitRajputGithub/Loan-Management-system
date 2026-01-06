@@ -301,6 +301,91 @@ class ApiClient {
         });
         return response.json();
     }
+
+    // ======================================
+    // Credit Line
+    // ======================================
+
+    async getMyCreditLine() {
+        return this.request<any>('/credit-lines/me');
+    }
+
+    async getCreditLine(id: string) {
+        return this.request<any>(`/credit-lines/${id}`);
+    }
+
+    async createCreditLine(data: {
+        interestRate: number;
+        holdings: Array<{
+            fundName: string;
+            fundType: string;
+            isin: string;
+            units: number;
+            nav: number;
+            folioNumber?: string;
+        }>;
+    }) {
+        return this.request<any>('/credit-lines', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    }
+
+    async addCreditLineCollateral(creditLineId: string, data: {
+        fundName: string;
+        fundType: string;
+        isin: string;
+        units: number;
+        nav: number;
+        folioNumber?: string;
+    }) {
+        return this.request<any>(`/credit-lines/${creditLineId}/collaterals`, {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    }
+
+    async activateCreditLine(id: string) {
+        return this.request<any>(`/credit-lines/${id}/activate`, {
+            method: 'POST',
+        });
+    }
+
+    async closeCreditLine(id: string) {
+        return this.request<any>(`/credit-lines/${id}/close`, {
+            method: 'POST',
+        });
+    }
+
+    // ======================================
+    // Tranches
+    // ======================================
+
+    async getTranches(creditLineId: string) {
+        return this.request<any[]>(`/credit-lines/${creditLineId}/tranches`);
+    }
+
+    async getTranche(id: string) {
+        return this.request<any>(`/tranches/${id}`);
+    }
+
+    async createTranche(creditLineId: string, data: { amount: number; purpose?: string }) {
+        return this.request<any>(`/credit-lines/${creditLineId}/tranches`, {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    }
+
+    async payTranche(trancheId: string, amount: number) {
+        return this.request<any>(`/tranches/${trancheId}/pay`, {
+            method: 'POST',
+            body: JSON.stringify({ amount }),
+        });
+    }
+
+    async getTrancheTransactions(trancheId: string) {
+        return this.request<any[]>(`/tranches/${trancheId}/transactions`);
+    }
 }
 
 export const api = new ApiClient();
