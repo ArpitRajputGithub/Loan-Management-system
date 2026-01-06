@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { creditLineService } from './creditLines.service';
+import { trancheService } from '../tranches/tranches.service';
 
 // Extending Express Request to include user from JWT
 interface AuthRequest extends Request {
@@ -254,7 +255,7 @@ class CreditLineController {
      */
     async accrueInterest(req: Request, res: Response, next: NextFunction) {
         try {
-            const result = await creditLineService.accrueInterestOnAllActiveTranches();
+            const result = await trancheService.accrueInterestOnAllActiveTranches();
             res.json({
                 success: true,
                 message: 'Interest accrual process completed',
